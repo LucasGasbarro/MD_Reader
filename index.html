@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Markdown Reader</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📖</text></svg>" />
+  <link rel="stylesheet" href="style.css" />
+  <!-- Marked.js for Markdown parsing -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <!-- highlight.js for code syntax highlighting -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github.min.css" id="hljs-light" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css" id="hljs-dark" disabled />
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js"></script>
+</head>
+<body>
+  <!-- Top Bar -->
+  <header class="topbar">
+    <div class="topbar-left">
+      <button id="btn-open-folder" title="Open Folder">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+        </svg>
+        <span>Open Folder</span>
+      </button>
+      <button id="btn-refresh" title="Refresh folder" style="display:none">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/>
+          <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+        </svg>
+        <span>Refresh</span>
+      </button>
+      <span id="folder-name" class="folder-name"></span>
+    </div>
+    <div class="topbar-right">
+      <button id="btn-theme" title="Toggle theme">
+        <svg id="icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+        </svg>
+        <svg id="icon-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="search-box">
+        <input type="text" id="search-input" placeholder="Filter files…" autocomplete="off" />
+      </div>
+      <nav id="file-tree" class="file-tree">
+        <div class="empty-state" id="empty-state">
+          <p>No folder opened.</p>
+          <p>Click <strong>Open Folder</strong> to get started.</p>
+        </div>
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="content" id="content">
+      <article class="markdown-body" id="markdown-body">
+        <div class="welcome">
+          <h1>📖 MD.Reader</h1>
+          <p>A lightweight Markdown file reader.</p>
+          <ol>
+            <li>Click <strong>Open Folder</strong> to select a folder with <code>.md</code> files.</li>
+            <li>Browse and filter files in the sidebar.</li>
+            <li>Click a file to render it here.</li>
+          </ol>
+        </div>
+      </article>
+    </main>
+
+    <!-- Floating Action Button -->
+    <button class="fab" id="fab-comment" style="display:none" title="Add comment">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+      </svg>
+      <span class="fab-badge" id="fab-badge"></span>
+    </button>
+
+    <!-- Comments Drawer -->
+    <div class="comments-drawer" id="comments-drawer">
+      <div class="drawer-header">
+        <h3>💬 Comments <span class="comments-count" id="comments-count"></span></h3>
+        <button class="drawer-close" id="drawer-close" title="Close">&times;</button>
+      </div>
+      <div class="comments-list" id="comments-list"></div>
+      <div class="comment-form" id="comment-form">
+        <div class="comment-selection-preview" id="comment-selection-preview" style="display:none">
+          <span class="selection-label">📌 Selected text:</span>
+          <blockquote class="selection-text" id="selection-text"></blockquote>
+          <button class="selection-clear" id="selection-clear" title="Clear selection">&times;</button>
+        </div>
+        <textarea id="comment-input" placeholder="Add a comment… (select text first to attach it)" rows="3"></textarea>
+        <button id="btn-add-comment">💬 Add Comment</button>
+      </div>
+    </div>
+    <div class="drawer-overlay" id="drawer-overlay"></div>
+
+    <!-- Table of Contents -->
+    <aside class="toc-panel" id="toc-panel">
+      <h3 class="toc-title">Table of Contents</h3>
+      <nav id="toc-nav" class="toc-nav"></nav>
+    </aside>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
