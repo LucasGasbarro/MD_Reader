@@ -159,7 +159,7 @@
       if (entry.kind === "file" && entry.name.toLowerCase().endsWith(".md")) {
         const path = basePath ? `${basePath}/${entry.name}` : entry.name;
         fileEntries.push({ path, name: entry.name, handle: entry });
-      } else if (entry.kind === "directory") {
+      } else if (entry.kind === "directory" && entry.name !== "node_modules") {
         const subPath = basePath ? `${basePath}/${entry.name}` : entry.name;
         folderPaths.push(subPath);
         await readDirectory(entry, subPath);
